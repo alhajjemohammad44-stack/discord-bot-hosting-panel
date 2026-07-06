@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: discord-bot-hosting-panel
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --workers 2 --timeout 120
+    envVars:
+      - key: ADMIN_PASSWORD
+        value: 61174271082
+      - key: SECRET_KEY
+        value: discord-bot-hosting-secret-change-in-production
+      - key: DEBUG
+        value: "false"
+    disk:
+      name: data
+      mountPath: /app/data
+      sizeGB: 1
