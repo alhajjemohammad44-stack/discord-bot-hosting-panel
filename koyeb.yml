@@ -1,0 +1,29 @@
+name: discord-bot-hosting
+service:
+  port: 5000
+  env:
+    - key: ADMIN_PASSWORD
+      value: "61174271082"
+    - key: SECRET_KEY
+      value: "discord-bot-hosting-secret-change-in-production"
+    - key: DEBUG
+      value: "false"
+  health:
+    path: /
+    interval: 10
+    initial_delay: 15
+  routes:
+    - path: /
+      port: 5000
+  resources:
+    memory: 512
+  instance:
+    type: nano
+    count: 1
+  volumes:
+    - name: data
+      mount_path: /app/data
+    - name: bots
+      mount_path: /app/bots
+    - name: uploads
+      mount_path: /app/uploads
