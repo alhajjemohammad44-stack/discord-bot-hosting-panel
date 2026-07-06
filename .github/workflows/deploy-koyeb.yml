@@ -1,0 +1,40 @@
+name: Deploy to Koyeb
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Koyeb CLI
+        run: |
+          curl -fsSL https://github.com/koyeb/koyeb-cli/releases/download/v5.10.2/koyeb-cli_5.10.2_linux_amd64.tar.gz -o koyeb.tar.gz
+          tar -xzf koyeb.tar.gz
+          chmod +x koyeb
+          sudo mv koyeb /usr/local/bin/koyeb
+
+      - name: Deploy to Koyeb
+        env:
+          KOYEB_TOKEN: ${{ secrets.KOYEB_TOKEN }}
+        run: |
+          koyeb login --token $KOYEB_TOKEN
+          koyeb app create discord-bot-hosting-panel \
+            --git github.com/${{ github.repository }} \
+            --git-branch main \
+            --build-pack python \
+            --run-command "gunicorn app:app --bind 0.0.0.0:\$PORT --workers 2 --timeout 120" \
+            --env ADMIN_PASSWORD=${{ secrets.ADMIN_PASSWORD }} \
+            --env SECRET_KEY=${{ secrets.SECRET_KEY }} \
+            --env DEBUG=false \
+            --port 5000
+
+      - name: Deploy status
+        run: |
+          echo "✅ Deployment triggered! Check Koyeb dashboard: https://app.koyeb.com"
