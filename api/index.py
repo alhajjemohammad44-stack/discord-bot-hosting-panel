@@ -4,6 +4,7 @@ Vercel entry point for Discord Bot Hosting Panel
 import sys
 import os
 import traceback as tb_module
+import shutil
 
 # Add project root to path
 root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -15,13 +16,18 @@ for p in [root_dir, cwd]:
 os.environ.setdefault('ADMIN_PASSWORD', '61174271082')
 os.environ.setdefault('SECRET_KEY', 'discord-bot-hosting-secret-key-vercel')
 
-# Create directories
+# Create directories in /tmp (Vercel writable storage)
 for folder in ['bots', 'data', 'uploads']:
-    for base in [cwd, '/tmp']:
-        try:
-            os.makedirs(os.path.join(base, folder), exist_ok=True)
-        except:
-            pass
+    os.makedirs(os.path.join('/tmp', folder), exist_ok=True)
+
+# Copy existing database to /tmp if it exists
+src_db = os.path.join(cwd, 'data', 'bots.db')
+dst_db = os.path.join('/tmp', 'data', 'bots.db')
+if os.path.exists(src_db) and not os.path.exists(dst_db):
+    try:
+        shutil.copy2(src_db, dst_db)
+    except:
+        pass
 
 # Import the Flask app - save error for debug
 import_error = None

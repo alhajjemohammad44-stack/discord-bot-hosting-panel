@@ -8,7 +8,11 @@ import json
 from datetime import datetime
 from typing import Optional, List, Dict, Any, Tuple
 
-DB_PATH = os.path.join(os.path.dirname(__file__), "data", "bots.db")
+# Use /tmp on Vercel (read-only filesystem), otherwise use project data/
+if os.environ.get('VERCEL') == '1' or '/var/task' in __file__:
+    DB_PATH = os.path.join('/tmp', 'data', 'bots.db')
+else:
+    DB_PATH = os.path.join(os.path.dirname(__file__), "data", "bots.db")
 
 def get_db() -> sqlite3.Connection:
     """الحصول على اتصال بقاعدة البيانات"""
@@ -275,5 +279,7 @@ def set_setting(bot_id: int, key: str, value: str):
     conn.commit()
     conn.close()
 
-# تهيئة قاعدة البيانات عند الاستيراد
+# تهيئة قاعدة البيانات عند الاستيراد (تتم مرة واحدة)
+# التأكد من وجود المجلد
+os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
 init_db()
