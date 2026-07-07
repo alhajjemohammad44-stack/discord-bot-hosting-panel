@@ -19,7 +19,10 @@ app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'discord-bot-hosting-secret-key-change-me')
 app.config['MAX_CONTENT_LENGTH'] = 100 * 1024 * 1024  # 100MB حد أقصى لرفع الملفات
 
-UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), "uploads")
+if os.environ.get('VERCEL') == '1' or '/var/task' in __file__:
+    UPLOAD_FOLDER = '/tmp/uploads'
+else:
+    UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), "uploads")
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 # ========== سياق القوالب ==========
